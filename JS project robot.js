@@ -65,11 +65,53 @@ move(destination) {
 }
 }
 
-let first = new VillageState(
-    "Post Office",
-    [{place: "Post Office", address: "Alice's House"}]
-);
-let next = first.move("Alice's House");
+// Testing of the VillageState object:
 
+// let first = new VillageState(
+//     "Post Office",
+//     [{place: "Post Office", address: "Alice's House"}]
+// );
+// let next = first.move("Alice's House");
 
+// runRobot is a function that takes a VillageState object and returns the name of a nearby place.
+// robot returns an object containing the direction it wants to move and a memory value that will be given back to it next time it is called.
 
+function runRobot(state, robot, memory) {
+    for (let turn = 0; ; turn++) {
+        if (state.parcels.length == 0) {
+            console.log(`Done in ${turn} turns`);
+            break;
+        }
+        let action = robot(state, memory);
+        state = state.move(action.direction);
+        memory = action.memory;
+        console.log(`Moved to ${action.direction}`);
+    }
+}
+
+// Random pick up and delivery strategy fo the robot. 
+function randomPick(array) {
+    let choice = Math.floor(Math.random() * array.length);
+    return array[choice];
+}
+
+function randomRobot(state) {
+    return {direction: randomPick(roadGraph[state.place])};
+}
+
+// Simulation of the random strategy using a static method 
+
+VillageState.random = function(parcelCount = 5) {
+    let parcels = [];
+    for (let i = 0; i < parcelCount; i++) {
+        let address = randomPick(Object.keys(roadGraph));
+        let place;
+        do {
+            place = randomPick(Object.keys(roadGraph));
+        } while (place == address);
+        parcels.push({place, address});
+    }
+    return new VillageState("Post Office", parcels);
+};
+
+runRobot(VillageState.random(), randomRobot);
